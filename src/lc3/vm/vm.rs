@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{self, Read};
 
 use crate::lc3::hardware::Memory::Memory;
-use crate::lc3::hardware::Registers;
+use crate::lc3::hardware::Reg;
 use crate::lc3::hardware::Flag;
 use  crate::lc3::cpu::Decoder;
 use  crate::lc3::opcode;
@@ -13,7 +13,7 @@ use crate::lc3::cpu::Instructions;
 // use  crate::lc3::
 pub struct LC3 {
     memory: Memory,
-    registers: Registers,
+    registers: Reg::Registers,
 }
 
 
@@ -22,7 +22,7 @@ impl LC3 {
     pub fn new() -> Self {
         Self {
             memory: Memory::new(),
-            registers: Registers::new(),
+            registers: Reg::Registers::new(),
         }
     }
 

@@ -1,6 +1,7 @@
 pub mod Flag;
 pub mod Memory;
-pub mod Register;
+pub mod Reg;
 
 pub use Memory::*;
-pub use Register::*;
+pub use Reg::*;
+pub use Flag::*;

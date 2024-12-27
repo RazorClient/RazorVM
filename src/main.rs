@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 mod lc3;
 
 use lc3::vm;

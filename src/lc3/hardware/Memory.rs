@@ -1,5 +1,11 @@
+use std::fs::File;
+use std::io::{Read, Result};
+use std::path::Path;
+
+pub const MEMORY_SIZE: usize = 1 << 16;
+
 pub struct Memory {
-    pub data: [u16; 1 << 16],
+    data: [u16; MEMORY_SIZE],
 }
 
 impl Memory {
@@ -24,7 +30,25 @@ impl Memory {
             panic!("Memory write out of bounds at address: {:#X}", address);
         }
     }
+    pub fn load_program<P: AsRef<Path>>(&mut self, filename: P, start_addr: u16) -> std::io::Result<()> {
+        let mut file = File::open(filename)?;
+        let mut buffer = Vec::new();
+        file.read_to_end(&mut buffer)?;
+
+    //     let mut addr = start_addr as usize;
+    //     for chunk in buffer.chunks(2) {
+    //         if chunk.len() == 2 {
+    //             let word = u16::from_be_bytes([chunk[0], chunk[1]]);
+    //             self.data[addr] = word;
+    //             addr += 1;
+    //         }
+    //     }
+        Ok(())
+    }
 }
+
+
+
 
 #[test]
 fn test_memory_read_write() {
