@@ -60,9 +60,13 @@ impl Instructions {
         // Update condition flags based on the loaded value
         registers.update_flags(dr);
     }
-
+    /// If bit [5] is 0, the second source operand is obtained from SR2.
+    /// If bit [5] is 1, the second source operand is obtained by sign-extending the imm5 field to 16 bits.
+    /// In either case, the second source operand and the contents of SR1 are bit- wise ANDed,
+    /// and the result stored in DR. The condition codes are set, based on whether the binary value produced,
+    /// taken as a 2’s complement integer, is negative, zero, or positive.
     ///  BIT-Wise AND instruction.
-    pub fn bitwise_and(instr: u16, registers: &mut Registers, memory: &Memory) {
+    pub fn bitwise_and(instr: u16, registers: &mut Registers) {
         // Extract destination register (DR)
         let dr = extract_register(instr, 9);
 
@@ -102,7 +106,7 @@ impl Instructions {
     /// - Performs a bitwise NOT on the value in SR.
     /// - Stores the result in DR.
     /// - Updates condition flags based on the result.
-    pub fn not(instr: u16, registers: &mut Registers) {
+    pub fn bitwise_not(instr: u16, registers: &mut Registers) {
         // Extract destination register (DR) from bits 11-9
         let dr = extract_register(instr, 9);
         // Extract source register (SR) from bits 8-6
@@ -116,6 +120,51 @@ impl Instructions {
 
         // Update condition flags based on the result
         registers.update_flags(dr);
+    }
+
+    /// `BR n,z,p PCoffset9`:
+    /// - Checks the condition flags (`n`, `z`, `p`).
+    /// - If any of the specified flags match the current condition flags, branch is taken.
+    /// - Branching is performed by adding the sign-extended `PCoffset9` to the current `PC`.
+    pub fn br(instr: u16, registers: &mut Registers) {
+        // Extract condition flags from bits 11-9
+        let cond_flag = (instr >> 9) & 0x7; // 3 bits: n, z, p
+
+        // Extract PCoffset9 from bits 8-0 and sign-extend it
+        let pc_offset = sign_extend(instr & 0x1FF, 9) as i16;
+
+        // Current PC
+        let pc = registers.read(RegisterEnum::PC) as i16;
+
+        // Current condition flags
+        let current_cond = registers.read(RegisterEnum::COND) as u16;
+
+        // Check if any of the specified condition flags are set
+        if cond_flag & current_cond != 0 {
+            // Branch is taken: update PC
+            let new_pc = pc.wrapping_add(pc_offset);
+            registers.write(RegisterEnum::PC, new_pc as u16);
+        }
+        // If branch not taken, PC remains unchanged (already incremented)
+    }
+// 15        12 11 9 8 6 5         0
+// +------------+-----+-----------+
+// |   Opcode   |BaseR|   Unused   |
+// +------------+-----+-----------+
+
+    /// `JMP BaseR`:
+    /// - Sets PC to the value contained in BaseR.
+    /// - Also handles the RET instruction when BaseR is R7.
+    pub fn jmp(instr: u16, registers: &mut Registers) {
+        // Extract Base Register (BaseR) from bits 11-9
+        let base_r_index = (instr >> 6) & 0x7; // Bits 8-6 represent BaseR
+        let base_r = RegisterEnum::try_from(base_r_index as usize).expect("Invalid Base Register");
+
+        // Retrieve the value from BaseR
+        let target_address = registers.read(base_r);
+
+        // Set PC to the target address
+        registers.write(RegisterEnum::PC, target_address);
     }
 }
 
