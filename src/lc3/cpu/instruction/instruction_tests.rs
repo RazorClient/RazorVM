@@ -1030,3 +1030,25 @@ fn integration_test_not_multiple_operations() {
 //         ConditionFlags::ZRO.bits() as u16
 //     );
 // }
+
+fn encode_jsr(pc_offset11: i16) -> u16 {
+    let opcode = 0b0100 << 12; // Opcode for JSR
+    let long_flag = 1 << 11;    // long_flag set to 1 for JSR
+    let offset = (pc_offset11 as u16) & 0x07FF; // Ensure 11 bits
+    opcode | long_flag | offset
+}
+
+/// Helper function to encode the JSRR instruction.
+///
+/// - `base_reg`: Base register number (0-7).
+///
+/// Returns the encoded 16-bit instruction.
+fn encode_jsrr(base_reg: usize) -> u16 {
+    let opcode = 0b0100 << 12; // Opcode for JSRR
+    let long_flag = 0 << 11;    // long_flag set to 0 for JSRR
+    let base = (base_reg & 0x7) << 6; // Ensure base_reg is 3 bits
+    (opcode | long_flag | base) as u16
+}
+
+
+// not in the mood maybe later 

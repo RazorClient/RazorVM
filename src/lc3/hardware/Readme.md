@@ -5,15 +5,15 @@
 - `pub fn new() -> Self`  
   Creates a new `Registers` instance with all registers (`R0`-`R7`, `PC`, `COND`) initialized to `0`.
 
-- `pub fn read(&self, reg: usize) -> u16`  
+- `pub fn read(&self, reg: RegisterEnum) -> u16`  
   Reads a `u16` value from the specified register:
   - Panics if the `reg` index is out of bounds.
 
-- `pub fn write(&mut self, reg: usize, value: u16)`  
+- `pub fn write(&mut self, reg: RegisterEnum, value: u16)`  
   Writes a `u16` value to the specified register:
   - Panics if the `reg` index is out of bounds.
 
-- `pub fn update_flags(&mut self, reg: usize)`  
+- `pub fn update_flags(&mut self, reg: RegisterEnum)`  
   Updates the `COND` register (`R9`) based on the value of the specified register (`R0`-`R7`):
   - The `COND` register is updated using the `ConditionFlags` derived from the value of the given register.
   - Panics if the specified register index is not within the range of general-purpose registers (`R0`-`R7`).

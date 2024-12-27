@@ -147,10 +147,10 @@ impl Instructions {
         }
         // If branch not taken, PC remains unchanged (already incremented)
     }
-// 15        12 11 9 8 6 5         0
-// +------------+-----+-----------+
-// |   Opcode   |BaseR|   Unused   |
-// +------------+-----+-----------+
+    // 15        12 11 9 8 6 5         0
+    // +------------+-----+-----------+
+    // |   Opcode   |BaseR|   Unused   |
+    // +------------+-----+-----------+
 
     /// `JMP BaseR`:
     /// - Sets PC to the value contained in BaseR.
@@ -166,6 +166,37 @@ impl Instructions {
         // Set PC to the target address
         registers.write(RegisterEnum::PC, target_address);
     }
+
+    // 15        12 11        0
+    // +------------+------------+
+    // |   Opcode   | PCoffset11  |
+    // +------------+------------+
+        /// Executes the JSR (Jump to Subroutine) instruction.
+    ///
+    /// `JSR PCoffset11`:
+    /// - Stores the current PC in R7.
+    /// - Adds the sign-extended PCoffset11 to the current PC to get the target address.
+    /// - Sets PC to the target address.
+    pub fn jsr(instr: u16, registers: &mut Registers) {
+        let base_reg = (instr >> 6) & 0x7;
+        let long_pc_offset = sign_extend(instr & 0x7ff, 11);
+        let long_flag = (instr >> 11) & 1;
+        let read_val=registers.read(RegisterEnum::PC);
+        registers.write(RegisterEnum::R7,read_val);
+    
+        if long_flag != 0 {
+            let val: u16 = registers.read(RegisterEnum::PC) + long_pc_offset as u16;
+            registers.write(RegisterEnum::PC, val);
+        } else {
+            registers.write(RegisterEnum::PC, registers.read(RegisterEnum::try_from(base_reg as usize).expect("Invalid Base Register")));/* JSRR */
+        }
+    }
+
+    
+
+
+
+
 }
 
 /// Sign-extends a value to the given bit width.
