@@ -1,4 +1,3 @@
-
 use bitflags::bitflags;
 
 bitflags! {
@@ -20,7 +19,7 @@ impl ConditionFlags {
             ConditionFlags::POS
         }
     }
-    
+
     pub fn is_condition_met(&self, condition: ConditionFlags) -> bool {
         self.contains(condition)
     }

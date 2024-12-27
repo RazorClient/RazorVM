@@ -1,8 +1,8 @@
 //Integration test
-use super::super::hardware::{Registers, RegisterEnum as Register};
-use super::super::hardware::Memory::Memory;
-use super::super::Instructions;
 use super::super::hardware::Flag::ConditionFlags;
+use super::super::hardware::Memory::Memory;
+use super::super::hardware::{RegisterEnum as Register, Registers};
+use super::super::Instructions;
 
 #[test]
 fn integration_test_add_register_mode() {
@@ -19,7 +19,10 @@ fn integration_test_add_register_mode() {
     // Verify R2 = R0 + R1 = 42
     assert_eq!(registers.read(Register::R2), 42);
     // Verify condition flags are set to POS
-    assert_eq!(registers.read(Register::COND), ConditionFlags::POS.bits() as u16);
+    assert_eq!(
+        registers.read(Register::COND),
+        ConditionFlags::POS.bits() as u16
+    );
 }
 
 #[test]
@@ -37,7 +40,10 @@ fn integration_test_add_immediate_mode() {
     // Verify R2 = R0 + 10 = 25
     assert_eq!(registers.read(Register::R2), 25);
     // Verify condition flags are set to POS
-    assert_eq!(registers.read(Register::COND), ConditionFlags::POS.bits() as u16);
+    assert_eq!(
+        registers.read(Register::COND),
+        ConditionFlags::POS.bits() as u16
+    );
 }
 
 #[test]
@@ -45,7 +51,7 @@ fn integration_test_add_result_zero() {
     let mut registers = Registers::new();
 
     // Initialize registers
-    registers.write(Register::R0, 5);  // R0 = 5
+    registers.write(Register::R0, 5); // R0 = 5
     registers.write(Register::R1, -5i16 as u16); // R1 = -5
 
     // Encode ADD R2, R0, R1
@@ -55,7 +61,10 @@ fn integration_test_add_result_zero() {
     // Verify R2 = R0 + R1 = 0
     assert_eq!(registers.read(Register::R2), 0);
     // Verify condition flags are set to ZRO
-    assert_eq!(registers.read(Register::COND), ConditionFlags::ZRO.bits() as u16);
+    assert_eq!(
+        registers.read(Register::COND),
+        ConditionFlags::ZRO.bits() as u16
+    );
 }
 
 #[test]
@@ -74,7 +83,10 @@ fn integration_test_add_overflow_negative() {
     // Verify R2 = R0 + R1 = -32768 + (-1) = 32767 (due to wrapping)
     assert_eq!(registers.read(Register::R2), 0x7FFF);
     // Verify condition flags are set to POS
-    assert_eq!(registers.read(Register::COND), ConditionFlags::POS.bits() as u16);
+    assert_eq!(
+        registers.read(Register::COND),
+        ConditionFlags::POS.bits() as u16
+    );
 }
 
 #[test]
@@ -95,7 +107,10 @@ fn test_add_registers_negative() {
     // Verify R3 = R1 + R2 = -25 -> 0xFFE7
     assert_eq!(registers.read(Register::R3), 0xFFE7);
     // Verify condition flags are set to NEG
-    assert_eq!(registers.read(Register::COND), ConditionFlags::NEG.bits() as u16);
+    assert_eq!(
+        registers.read(Register::COND),
+        ConditionFlags::NEG.bits() as u16
+    );
 }
 #[test]
 fn test_add_registers_zero() {
@@ -115,9 +130,11 @@ fn test_add_registers_zero() {
     // Verify R3 = R1 + R2 = 0
     assert_eq!(registers.read(Register::R3), 0);
     // Verify condition flags are set to ZRO
-    assert_eq!(registers.read(Register::COND), ConditionFlags::ZRO.bits() as u16);
+    assert_eq!(
+        registers.read(Register::COND),
+        ConditionFlags::ZRO.bits() as u16
+    );
 }
-
 
 #[test]
 fn integration_test_ldi_positive_value() {
@@ -149,7 +166,10 @@ fn integration_test_ldi_positive_value() {
     assert_eq!(registers.read(dr), 0x5555);
 
     // Verify condition flags are set to POS
-    assert_eq!(registers.read(Register::COND), ConditionFlags::POS.bits() as u16);
+    assert_eq!(
+        registers.read(Register::COND),
+        ConditionFlags::POS.bits() as u16
+    );
 }
 
 /// Integration test for the LDI instruction with a negative value.
@@ -183,7 +203,10 @@ fn integration_test_ldi_negative_value() {
     assert_eq!(registers.read(dr), 0x8000);
 
     // Verify condition flags are set to NEG
-    assert_eq!(registers.read(Register::COND), ConditionFlags::NEG.bits() as u16);
+    assert_eq!(
+        registers.read(Register::COND),
+        ConditionFlags::NEG.bits() as u16
+    );
 }
 
 /// Integration test for the LDI instruction with a zero value.
@@ -217,7 +240,10 @@ fn integration_test_ldi_zero_value() {
     assert_eq!(registers.read(dr), 0x0000);
 
     // Verify condition flags are set to ZRO
-    assert_eq!(registers.read(Register::COND), ConditionFlags::ZRO.bits() as u16);
+    assert_eq!(
+        registers.read(Register::COND),
+        ConditionFlags::ZRO.bits() as u16
+    );
 }
 
 /// Integration test for the LDI instruction with a negative PCoffset9 (backward addressing).
@@ -251,7 +277,8 @@ fn integration_test_ldi_negative_pc_offset() {
     assert_eq!(registers.read(dr), 0x5678);
 
     // Verify condition flags are set to POS
-    assert_eq!(registers.read(Register::COND), ConditionFlags::POS.bits() as u16);
+    assert_eq!(
+        registers.read(Register::COND),
+        ConditionFlags::POS.bits() as u16
+    );
 }
-
-

@@ -1,13 +1,13 @@
 use std::fs::File;
 use std::io::{self, Read};
 
+use crate::lc3::cpu::instruction;
+use crate::lc3::cpu::Decoder;
+use crate::lc3::cpu::Instructions;
+use crate::lc3::hardware::Flag;
 use crate::lc3::hardware::Memory::Memory;
 use crate::lc3::hardware::Reg;
-use crate::lc3::hardware::Flag;
-use  crate::lc3::cpu::Decoder;
-use  crate::lc3::opcode;
-use crate::lc3::cpu::instruction;
-use crate::lc3::cpu::Instructions;
+use crate::lc3::opcode;
 // use  crate::lc3::
 // use  crate::lc3::
 // use  crate::lc3::
@@ -15,7 +15,6 @@ pub struct LC3 {
     memory: Memory,
     registers: Reg::Registers,
 }
-
 
 impl LC3 {
     /// Create a new LC3 instance
@@ -78,22 +77,19 @@ impl LC3 {
         //         }
         //     }
         println!("VM execution completed.");
-        }
+    }
 
-  
-    
-
-//     pub fn execute_instruction(&mut self, instr: u16) {
-//         // Decode the instruction
-//         if let Some(opcode) = Decoder::decode(instr) {
-//             match opcode {
-//                 OpCode::ADD => {
-//                     // Call execute_add from Instructions
-//                     Instructions::add(instr, &mut self.registers);
-//                 }
-//                 // Handle other opcodes...
-//                 _ => {}
-//             }
-//         }
-//     }
+    //     pub fn execute_instruction(&mut self, instr: u16) {
+    //         // Decode the instruction
+    //         if let Some(opcode) = Decoder::decode(instr) {
+    //             match opcode {
+    //                 OpCode::ADD => {
+    //                     // Call execute_add from Instructions
+    //                     Instructions::add(instr, &mut self.registers);
+    //                 }
+    //                 // Handle other opcodes...
+    //                 _ => {}
+    //             }
+    //         }
+    //     }
 }

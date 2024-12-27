@@ -1,11 +1,10 @@
-use super::hardware::Reg::{RegisterEnum,Registers};
 use super::hardware::Memory::Memory;
+use super::hardware::Reg::{RegisterEnum, Registers};
 
 /// Represents LC-3 instructions and their implementations.
 pub struct Instructions;
 
 impl Instructions {
-
     /// The ADD instruction can either:
     /// - Add two registers: `ADD DR, SR1, SR2`
     /// - Add a register and an immediate value: `ADD DR, SR1, imm5`
@@ -36,7 +35,6 @@ impl Instructions {
         registers.update_flags(dr);
     }
 
-   
     pub fn ldi(instr: u16, registers: &mut Registers, memory: &Memory) {
         // Extract destination register (DR)
         let dr = extract_register(instr, 9);
@@ -63,40 +61,40 @@ impl Instructions {
         registers.update_flags(dr);
     }
 
-///  BIT-Wise AND instruction.
-pub fn bitwise_and(instr: u16, registers: &mut Registers, memory: &Memory) {
-    // Extract destination register (DR)
-    let dr = extract_register(instr, 9);
+    ///  BIT-Wise AND instruction.
+    pub fn bitwise_and(instr: u16, registers: &mut Registers, memory: &Memory) {
+        // Extract destination register (DR)
+        let dr = extract_register(instr, 9);
 
-    // Extract source register (SR1)
-    let sr1 = extract_register(instr, 6);
+        // Extract source register (SR1)
+        let sr1 = extract_register(instr, 6);
 
-    // Check immediate flag
-    let imm_flag = (instr >> 5) & 0x1;
+        // Check immediate flag
+        let imm_flag = (instr >> 5) & 0x1;
 
-    if imm_flag != 0 {
-        // Immediate mode: Extract and sign-extend imm5
-        let imm5 = sign_extend(instr & 0x1F, 5);
+        if imm_flag != 0 {
+            // Immediate mode: Extract and sign-extend imm5
+            let imm5 = sign_extend(instr & 0x1F, 5);
 
-        // Perform bitwise AND with immediate value
-        let result = registers.read(sr1) & imm5;
+            // Perform bitwise AND with immediate value
+            let result = registers.read(sr1) & imm5;
 
-        // Write the result to the destination register
-        registers.write(dr, result);
-    } else {
-        // Register mode: Extract source register 2 (SR2)
-        let sr2 = extract_register(instr, 0);
+            // Write the result to the destination register
+            registers.write(dr, result);
+        } else {
+            // Register mode: Extract source register 2 (SR2)
+            let sr2 = extract_register(instr, 0);
 
-        // Perform bitwise AND with second register
-        let result = registers.read(sr1) & registers.read(sr2);
+            // Perform bitwise AND with second register
+            let result = registers.read(sr1) & registers.read(sr2);
 
-        // Write the result to the destination register
-        registers.write(dr, result);
+            // Write the result to the destination register
+            registers.write(dr, result);
+        }
+
+        // Update condition flags based on the result
+        registers.update_flags(dr);
     }
-
-    // Update condition flags based on the result
-    registers.update_flags(dr);
-}
 
     /// Executes the NOT (Bitwise NOT) instruction.
     ///
@@ -119,12 +117,10 @@ pub fn bitwise_and(instr: u16, registers: &mut Registers, memory: &Memory) {
         // Update condition flags based on the result
         registers.update_flags(dr);
     }
-
-
 }
 
 /// Sign-extends a value to the given bit width.
-/// 
+///
 /// - `x`: The value to sign-extend.
 /// - `bit_count`: The original bit width of the value.
 
@@ -135,25 +131,25 @@ fn sign_extend(x: u16, bit_count: usize) -> u16 {
         x
     }
 }
-    /// Extracts a register from an instruction.
-    /// 
-    /// - `instr`: The 16-bit LC-3 instruction word.
-    /// - `shift`: The bit position of the register in the instruction.
-    ///
-    /// Returns the corresponding `Register`.
-    fn extract_register(instr: u16, shift: usize) -> RegisterEnum {
-        match (instr >> shift) & 0x7 {
-            0 => RegisterEnum::R0,
-            1 => RegisterEnum::R1,
-            2 => RegisterEnum::R2,
-            3 => RegisterEnum::R3,
-            4 => RegisterEnum::R4,
-            5 => RegisterEnum::R5,
-            6 => RegisterEnum::R6,
-            7 => RegisterEnum::R7,
-            _ => unreachable!(), // Should never happen due to 3-bit mask
-        }
+/// Extracts a register from an instruction.
+///
+/// - `instr`: The 16-bit LC-3 instruction word.
+/// - `shift`: The bit position of the register in the instruction.
+///
+/// Returns the corresponding `Register`.
+fn extract_register(instr: u16, shift: usize) -> RegisterEnum {
+    match (instr >> shift) & 0x7 {
+        0 => RegisterEnum::R0,
+        1 => RegisterEnum::R1,
+        2 => RegisterEnum::R2,
+        3 => RegisterEnum::R3,
+        4 => RegisterEnum::R4,
+        5 => RegisterEnum::R5,
+        6 => RegisterEnum::R6,
+        7 => RegisterEnum::R7,
+        _ => unreachable!(), // Should never happen due to 3-bit mask
     }
+}
 
 #[cfg(test)]
 mod instruction_tests;

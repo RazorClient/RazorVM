@@ -11,8 +11,8 @@ pub enum RegisterEnum {
     R5 = 5,
     R6 = 6,
     R7 = 7,
-    PC = 8,    // Program Counter
-    COND = 9,  // Condition Flags
+    PC = 8,   // Program Counter
+    COND = 9, // Condition Flags
 }
 
 impl TryFrom<usize> for RegisterEnum {
@@ -42,9 +42,7 @@ pub struct Registers {
 impl Registers {
     /// Creates a new Registers instance with all registers initialized to 0.
     pub fn new() -> Self {
-        Registers {
-            data: [0; 10],
-        }
+        Registers { data: [0; 10] }
     }
 
     /// Reads a value from the specified register.
@@ -70,7 +68,10 @@ impl Registers {
         let reg_index = reg as usize;
 
         if reg_index >= 8 {
-            panic!("Cannot update flags for non-general-purpose register: {:?}", reg);
+            panic!(
+                "Cannot update flags for non-general-purpose register: {:?}",
+                reg
+            );
         }
 
         let value = self.data[reg_index] as i16;
@@ -78,7 +79,6 @@ impl Registers {
         self.data[RegisterEnum::COND as usize] = new_flags.bits() as u16; // Store the flags in the COND register (R9)
     }
 }
-
 
 #[cfg(test)]
 mod tests {
