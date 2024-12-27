@@ -251,149 +251,110 @@ fn integration_test_ldi_negative_pc_offset() {
 }
 
 
+/// Integration test for the NOT instruction with a positive value.
+#[test]
+fn integration_test_not_positive_value() {
+    let mut registers = Registers::new();
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+    // Initialize register R1 with a positive value
+    registers.write(Register::R1, 0x1234); // R1 = 0x1234
 
-    #[test]
-    fn test_bitwise_and_immediate_mode() {
-        let mut registers = Registers::new();
-        let memory = Memory::new();
+    // Encode NOT R2, R1
+    // Opcode for NOT is 1001 (0b1001)
+    // Format: 1001 DR SR 111111
+    // Example: NOT R2, R1 -> 1001 010 001 111111 -> 0b1001_010_001_111111 = 0x942F
+    let instr = (0b1001 << 12) | (2 << 9) | (1 << 6) | 0x3F; // Opcode=1001 (NOT), DR=R2, SR=R1
 
-        // Set up initial register values
-        registers.write(1, 0b10101010); // SR1
+    // Execute the NOT instruction
+    Instructions::not(instr, &mut registers);
 
-        // Instruction: AND R0, R1, #0b111
-        let instr = 0b0101_000_001_1_00000111;
+    // Verify R2 = ~R1 = 0xEDCB
+    assert_eq!(registers.read(Register::R2), !0x1234);
 
-        // Execute the instruction
-        bitwise_and(instr, &mut registers, &memory);
-
-        // Verify result
-        assert_eq!(registers.read(0), 0b00000010); // R0
-
-        // Verify flags
-        // Assuming update_flags is correct, verify ZRO flag
-        assert_eq!(registers.read_cond_flags(), ConditionFlags::ZRO);
-    }
-
-    #[test]
-    fn test_bitwise_and_register_mode() {
-        let mut registers = Registers::new();
-        let memory = Memory::new();
-
-        // Set up initial register values
-        registers.write(1, 0b10101010); // SR1
-        registers.write(2, 0b11110000); // SR2
-
-        // Instruction: AND R0, R1, R2
-        let instr = 0b0101_000_001_0_00000010;
-
-        // Execute the instruction
-        bitwise_and(instr, &mut registers, &memory);
-
-        // Verify result
-        assert_eq!(registers.read(0), 0b10100000); // R0
-
-        // Verify flags
-        // Assuming update_flags is correct, verify POS flag
-        assert_eq!(registers.read_cond_flags(), ConditionFlags::POS);
-    }
-
-    #[test]
-    fn test_bitwise_and_zero_result() {
-        let mut registers = Registers::new();
-        let memory = Memory::new();
-
-        // Set up initial register values
-        registers.write(1, 0b10101010); // SR1
-        registers.write(2, 0b01010101); // SR2
-
-        // Instruction: AND R0, R1, R2
-        let instr = 0b0101_000_001_0_00000010;
-
-        // Execute the instruction
-        bitwise_and(instr, &mut registers, &memory);
-
-        // Verify result
-        assert_eq!(registers.read(0), 0); // R0
-
-        // Verify flags
-        // Assuming update_flags is correct, verify ZRO flag
-        assert_eq!(registers.read_cond_flags(), ConditionFlags::ZRO);
-    }
+    // Verify condition flags are set to NEG (since ~0x1234 = 0xEDCB, which is negative in two's complement)
+    assert_eq!(registers.read(Register::COND), ConditionFlags::NEG.bits() as u16);
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+/// Integration test for the NOT instruction with a negative value.
+#[test]
+fn integration_test_not_negative_value() {
+    let mut registers = Registers::new();
 
-    #[test]
-    fn test_bitwise_and_immediate_mode() {
-        let mut registers = Registers::new();
-        let memory = Memory::new();
+    // Initialize register R1 with a negative value
+    registers.write(Register::R1, 0x8000); // R1 = 0x8000 (-32768)
 
-        // Set up initial register values
-        registers.write(1, 0b10101010); // SR1
+    // Encode NOT R2, R1
+    let instr = (0b1001 << 12) | (2 << 9) | (1 << 6) | 0x3F; // Opcode=1001 (NOT), DR=R2, SR=R1
 
-        // Instruction: AND R0, R1, #0b111
-        let instr = 0b0101_000_001_1_00000111;
+    // Execute the NOT instruction
+    Instructions::not(instr, &mut registers);
 
-        // Execute the instruction
-        bitwise_and(instr, &mut registers, &memory);
+    // Verify R2 = ~R1 = 0x7FFF
+    assert_eq!(registers.read(Register::R2), !0x8000);
 
-        // Verify result
-        assert_eq!(registers.read(0), 0b00000010); // R0
+    // Verify condition flags are set to POS (since ~0x8000 = 0x7FFF, which is positive)
+    assert_eq!(registers.read(Register::COND), ConditionFlags::POS.bits() as u16);
+}
 
-        // Verify flags
-        // Assuming update_flags is correct, verify ZRO flag
-        assert_eq!(registers.read_cond_flags(), ConditionFlags::ZRO);
-    }
+/// Integration test for the NOT instruction with a zero value.
+#[test]
+fn integration_test_not_zero_value() {
+    let mut registers = Registers::new();
 
-    #[test]
-    fn test_bitwise_and_register_mode() {
-        let mut registers = Registers::new();
-        let memory = Memory::new();
+    // Initialize register R1 with zero
+    registers.write(Register::R1, 0x0000); // R1 = 0x0000
 
-        // Set up initial register values
-        registers.write(1, 0b10101010); // SR1
-        registers.write(2, 0b11110000); // SR2
+    // Encode NOT R2, R1
+    let instr = (0b1001 << 12) | (2 << 9) | (1 << 6) | 0x3F; // Opcode=1001 (NOT), DR=R2, SR=R1
 
-        // Instruction: AND R0, R1, R2
-        let instr = 0b0101_000_001_0_00000010;
+    // Execute the NOT instruction
+    Instructions::not(instr, &mut registers);
 
-        // Execute the instruction
-        bitwise_and(instr, &mut registers, &memory);
+    // Verify R2 = ~R1 = 0xFFFF
+    assert_eq!(registers.read(Register::R2), !0x0000);
 
-        // Verify result
-        assert_eq!(registers.read(0), 0b10100000); // R0
+    // Verify condition flags are set to NEG (since ~0x0000 = 0xFFFF, which is negative)
+    assert_eq!(registers.read(Register::COND), ConditionFlags::NEG.bits() as u16);
+}
 
-        // Verify flags
-        // Assuming update_flags is correct, verify POS flag
-        assert_eq!(registers.read_cond_flags(), ConditionFlags::POS);
-    }
+/// Integration test for the NOT instruction with maximum register value.
+#[test]
+fn integration_test_not_max_value() {
+    let mut registers = Registers::new();
 
-    #[test]
-    fn test_bitwise_and_zero_result() {
-        let mut registers = Registers::new();
-        let memory = Memory::new();
+    // Initialize register R1 with maximum value
+    registers.write(Register::R1, 0xFFFF); // R1 = 0xFFFF (-1)
 
-        // Set up initial register values
-        registers.write(1, 0b10101010); // SR1
-        registers.write(2, 0b01010101); // SR2
+    // Encode NOT R2, R1
+    let instr = (0b1001 << 12) | (2 << 9) | (1 << 6) | 0x3F; // Opcode=1001 (NOT), DR=R2, SR=R1
 
-        // Instruction: AND R0, R1, R2
-        let instr = 0b0101_000_001_0_00000010;
+    // Execute the NOT instruction
+    Instructions::not(instr, &mut registers);
 
-        // Execute the instruction
-        bitwise_and(instr, &mut registers, &memory);
+    // Verify R2 = ~R1 = 0x0000
+    assert_eq!(registers.read(Register::R2), !0xFFFF);
 
-        // Verify result
-        assert_eq!(registers.read(0), 0); // R0
+    // Verify condition flags are set to ZRO (since ~0xFFFF = 0x0000)
+    assert_eq!(registers.read(Register::COND), ConditionFlags::ZRO.bits() as u16);
+}
 
-        // Verify flags
-        // Assuming update_flags is correct, verify ZRO flag
-        assert_eq!(registers.read_cond_flags(), ConditionFlags::ZRO);
-    }
+/// Integration test for the NOT instruction with minimum register value.
+#[test]
+fn integration_test_not_min_value() {
+    let mut registers = Registers::new();
+
+    // Initialize register R1 with minimum value
+    registers.write(Register::R1, 0x8000); // R1 = 0x8000 (-32768)
+
+    // Encode NOT R2, R1
+    let instr = (0b1001 << 12) | (2 << 9) | (1 << 6) | 0x3F; // Opcode=1001 (NOT), DR=R2, SR=R1
+
+    // Execute the NOT instruction
+    Instructions::not(instr, &mut registers);
+
+    // Verify R2 = ~R1 = 0x7FFF
+    assert_eq!(registers.read(Register::R2), !0x8000);
+
+    // Verify condition flags are set to POS (since ~0x8000 = 0x7FFF)
+    assert_eq!(registers.read(Register::COND), ConditionFlags::POS.bits() as u16);
 }

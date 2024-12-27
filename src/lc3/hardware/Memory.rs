@@ -3,7 +3,7 @@ use std::io::{Read, Result};
 use std::path::Path;
 
 pub const MEMORY_SIZE: usize = 1 << 16;
-
+#[derive(Copy)]
 pub struct Memory {
     data: [u16; MEMORY_SIZE],
 }
@@ -45,10 +45,29 @@ impl Memory {
     //     }
         Ok(())
     }
+
+}
+impl Clone for Memory {
+    fn clone(&self) -> Memory {
+        *self
+    }
 }
 
+#[cfg(test)]
+mod memory_test {
+    use super::*;
 
+    const EXPECTED_MEMORY_SIZE: usize = 65536;
+#[test]
+    fn memory_size() {
+        let memory = Memory::new();
+        assert_eq!(memory.data.len(), EXPECTED_MEMORY_SIZE);
+    }
 
+    #[test]
+    fn memory_size_constant() {
+        assert_eq!(MEMORY_SIZE, EXPECTED_MEMORY_SIZE);
+    }
 
 #[test]
 fn test_memory_read_write() {
@@ -62,4 +81,5 @@ fn test_memory_read_write() {
 fn test_memory_out_of_bounds_read() {
     let memory = Memory::new();
     memory.read(0x1_0000); // Invalid address
+}
 }

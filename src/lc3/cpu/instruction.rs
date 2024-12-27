@@ -98,6 +98,28 @@ pub fn bitwise_and(instr: u16, registers: &mut Registers, memory: &Memory) {
     registers.update_flags(dr);
 }
 
+    /// Executes the NOT (Bitwise NOT) instruction.
+    ///
+    /// `NOT DR, SR`:
+    /// - Performs a bitwise NOT on the value in SR.
+    /// - Stores the result in DR.
+    /// - Updates condition flags based on the result.
+    pub fn not(instr: u16, registers: &mut Registers) {
+        // Extract destination register (DR) from bits 11-9
+        let dr = extract_register(instr, 9);
+        // Extract source register (SR) from bits 8-6
+        let sr = extract_register(instr, 6);
+
+        // Perform bitwise NOT on the value in SR
+        let value = !registers.read(sr);
+
+        // Write the result to DR
+        registers.write(dr, value);
+
+        // Update condition flags based on the result
+        registers.update_flags(dr);
+    }
+
 
 }
 
