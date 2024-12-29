@@ -285,31 +285,89 @@ impl Instructions {
         registers.update_flags(dr);
     }
 
-/// Executes the ST (Store) instruction.
-///
-/// `ST SR, PCoffset9`:
-/// - Computes the target memory address by adding the 9-bit signed `PCoffset9` to the current `PC`.
-/// - Stores the value from the source register (`SR`) into the computed memory address.
-// 15        12 11        9 8                         0
-// +------------+------------+---------------------------+
-// |   Opcode   | Source Reg  |        PCoffset9         |
-// +------------+------------+---------------------------+
+    /// Executes the ST (Store) instruction.
+    ///
+    /// `ST SR, PCoffset9`:
+    /// - Computes the target memory address by adding the 9-bit signed `PCoffset9` to the current `PC`.
+    /// - Stores the value from the source register (`SR`) into the computed memory address.
+    // 15        12 11        9 8                         0
+    // +------------+------------+---------------------------+
+    // |   Opcode   | Source Reg  |        PCoffset9         |
+    // +------------+------------+---------------------------+
 
-pub fn st(instr: u16, registers: &mut Registers, memory: &mut Memory) {
-    // Extract source register (SR)
-    let sr = extract_register(instr, 9);
+    pub fn st(instr: u16, registers: &mut Registers, memory: &mut Memory) {
+        // Extract source register (SR)
+        let sr = extract_register(instr, 9);
 
-    // Extract PCoffset9 and sign-extend it
-    let pc_offset = sign_extend(instr & 0x1FF, 9);
+        // Extract PCoffset9 and sign-extend it
+        let pc_offset = sign_extend(instr & 0x1FF, 9);
 
-    // Calculate the target memory address: PC + PCoffset9
-    let pc = registers.read(RegisterEnum::PC) ;
-    let target_address = (pc as u32 + pc_offset as u32 ) as u16;
+        // Calculate the target memory address: PC + PCoffset9
+        let pc = registers.read(RegisterEnum::PC);
+        let target_address = (pc as u32 + pc_offset as u32) as u16;
 
-    // Read value from the source register and write to the target memory address
-    let value = registers.read(sr);
-    memory.write(target_address as usize, value);
-}
+        // Read value from the source register and write to the target memory address
+        let value = registers.read(sr);
+        memory.write(target_address as usize, value);
+    }
+    /// Executes the STI (Store Indirect) instruction.
+    ///
+    /// `STI SR, PCoffset9`:
+    /// - Computes the intermediate memory address by adding the 9-bit signed `PCoffset9` to the current `PC`.
+    /// - Reads the final memory address from the intermediate address.
+    /// - Stores the value from the source register (`SR`) into the memory at the final address.
+    // 15        12 11        9 8                         0
+    // +------------+------------+---------------------------+
+    // |   Opcode   | Source Reg  |        PCoffset9         |
+    // +------------+------------+---------------------------+
+    
+
+    pub fn sti(instr: u16, registers: &mut Registers, memory: &mut Memory) {
+        // Extract source register (SR)
+        let sr = extract_register(instr, 9);
+
+        // Extract PCoffset9 and sign-extend it
+        let pc_offset = sign_extend(instr & 0x1FF, 9) as u32;
+
+        // Calculate intermediate memory address: PC + PCoffset9
+        let pc = registers.read(RegisterEnum::PC) as u32;
+        let intermediate_address = pc+pc_offset;
+
+        // Read final address from the intermediate memory location
+        let final_address = memory.read(intermediate_address as usize);
+
+        // Read value from the source register and write to the final memory address
+        let value = registers.read(sr);
+        memory.write(final_address as usize, value);
+    }
+    /// Executes the STR (Store Register) instruction.
+    ///  15        12 11        9 8        6 5                0
+    // +------------+------------+----------+------------------+
+    // |   Opcode   | Source Reg  | BaseReg |     Offset6      |
+    // +------------+------------+----------+------------------+
+
+    /// `STR SR, BaseR, Offset6`:
+    /// - Computes the target memory address by adding the 6-bit signed `Offset6` to the value in the base register (`BaseR`).
+    /// - Stores the value from the source register (`SR`) into the computed memory address.
+    pub fn str(instr: u16, registers: &mut Registers, memory: &mut Memory) {
+        // Extract source register (SR)
+        let sr = extract_register(instr, 9);
+
+        // Extract base register (BaseR)
+        let base_reg = extract_register(instr, 6);
+
+        // Extract Offset6 and sign-extend it
+        let offset6 = sign_extend(instr & 0x3F, 6);
+
+        // Calculate the target memory address: BaseR + Offset6
+        let base_address = registers.read(base_reg);
+        let target_address = (base_address as u32 +offset6 as u32) as u16;
+
+        // Read value from the source register and write to the target memory address
+        let value = registers.read(sr);
+        memory.write(target_address as usize, value);
+    }
+
 }
 
 /// Sign-extends a value to the given bit width.

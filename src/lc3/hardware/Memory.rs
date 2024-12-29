@@ -14,16 +14,18 @@ impl Memory {
     }
 
     pub fn read(&self, address: usize) -> u16 {
-        if address < self.data.len() {
-            self.data[address]
+        let effective_address = address & 0xFFFF; // Wrap within 16-bit range
+        if effective_address < self.data.len() {
+            self.data[effective_address]
         } else {
             panic!("Memory read out of bounds at address: {:#X}", address);
         }
     }
 
     pub fn write(&mut self, address: usize, value: u16) {
-        if address < self.data.len() {
-            self.data[address] = value;
+        let effective_address = address & 0xFFFF; // Wrap within 16-bit range
+        if effective_address < self.data.len() {
+            self.data[effective_address] = value;
         } else {
             panic!("Memory write out of bounds at address: {:#X}", address);
         }

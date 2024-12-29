@@ -1139,3 +1139,93 @@ fn integration_test_store_negative_offset() {
     // Verify memory at PC - 2 = 0x3000 contains 0xFFFF
     assert_eq!(memory.read(0x3000), 0xFFFF);
 }
+
+#[test]
+fn integration_test_store_indirect_positive_offset() {
+    let mut registers = Registers::new();
+    let mut memory = Memory::new();
+
+    // Initialize PC to 0x3000
+    registers.write(Register::PC, 0x3000);
+
+    // Set intermediate memory address (PC + offset = 0x3002) to 0x4000
+    memory.write(0x3002, 0x4000);
+
+    // Initialize source register R1 with a value
+    registers.write(Register::R1, 0x1234);
+
+    // Encode STI R1, PCoffset9=2
+    let instr = (0b1011 << 12) | (1 << 9) | 0x002; // Opcode=1011 (STI), SR=R1, PCoffset9=2
+
+    // Execute the STI instruction
+    Instructions::sti(instr, &mut registers, &mut memory);
+
+    // Verify memory at final address 0x4000 contains 0x1234
+    assert_eq!(memory.read(0x4000), 0x1234);
+}
+
+#[test]
+fn integration_test_store_indirect_negative_offset() {
+    let mut registers = Registers::new();
+    let mut memory = Memory::new();
+
+    // Initialize PC to 0x3002
+    registers.write(Register::PC, 0x3002);
+
+    // Set intermediate memory address (PC - offset = 0x3000) to 0x2000 (valid 16-bit address)
+    memory.write(0x3000, 0x2000);
+
+    // Initialize source register R2 with a value
+    registers.write(Register::R2, 0xFFFF);
+
+    // Encode STI R2, PCoffset9=-2
+    let instr = (0b1011 << 12) | (2 << 9) | 0x1FE; // PCoffset9=-2 (0x1FE is -2 in 9-bit two's complement)
+
+    // Execute the STI instruction
+    Instructions::sti(instr, &mut registers, &mut memory);
+
+    // Verify memory at final address 0x2000 contains 0xFFFF
+    assert_eq!(memory.read(0x2000), 0xFFFF);
+}
+
+#[test]
+fn integration_test_store_register_positive_offset() {
+    let mut registers = Registers::new();
+    let mut memory = Memory::new();
+
+    // Initialize BaseR (R1) with base address 0x3000
+    registers.write(Register::R1, 0x3000);
+
+    // Initialize source register R2 with a value
+    registers.write(Register::R2, 0x1234);
+
+    // Encode STR R2, R1, Offset6=2
+    let instr = (0b0111 << 12) | (2 << 9) | (1 << 6) | 0x02; // Opcode=0111 (STR), SR=R2, BaseR=R1, Offset6=2
+
+    // Execute the STR instruction
+    Instructions::str(instr, &mut registers, &mut memory);
+
+    // Verify memory at BaseR + Offset6 = 0x3002 contains 0x1234
+    assert_eq!(memory.read(0x3002), 0x1234);
+}
+
+#[test]
+fn integration_test_store_register_negative_offset() {
+    let mut registers = Registers::new();
+    let mut memory = Memory::new();
+
+    // Initialize BaseR (R1) with base address 0x3002
+    registers.write(Register::R1, 0x3002);
+
+    // Initialize source register R3 with a value
+    registers.write(Register::R3, 0xFFFF);
+
+    // Encode STR R3, R1, Offset6=-2
+    let instr = (0b0111 << 12) | (3 << 9) | (1 << 6) | 0x3E; // Offset6=-2 (0x3E is -2 in 6-bit two's complement)
+
+    // Execute the STR instruction
+    Instructions::str(instr, &mut registers, &mut memory);
+
+    // Verify memory at BaseR + Offset6 = 0x3000 contains 0xFFFF
+    assert_eq!(memory.read(0x3000), 0xFFFF);
+}
