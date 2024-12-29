@@ -171,7 +171,7 @@ impl Instructions {
     // +------------+------------+
     // |   Opcode   | PCoffset11  |
     // +------------+------------+
-        /// Executes the JSR (Jump to Subroutine) instruction.
+    /// Executes the JSR (Jump to Subroutine) instruction.
     ///
     /// `JSR PCoffset11`:
     /// - Stores the current PC in R7.
@@ -179,11 +179,11 @@ impl Instructions {
     /// - Sets PC to the target address.
     pub fn jsr(instr: u16, registers: &mut Registers) {
         let long_flag = (instr >> 11) & 0x1;
-        
+
         // Save the current PC into R7
         let current_pc = registers.read(RegisterEnum::PC);
         registers.write(RegisterEnum::R7, current_pc);
-    
+
         if long_flag != 0 {
             // JSR: Use PC-relative offset
             let pc_offset = sign_extend(instr & 0x7FF, 11);
@@ -200,64 +200,90 @@ impl Instructions {
     // +------------+------------+---------------------------+
     // |   Opcode   | Destination |        PCoffset9         |
     // +------------+------------+---------------------------+
-    
+
     pub fn ld(instr: u16, registers: &mut Registers, memory: &Memory) {
         // Extract destination register (DR)
         let dr = extract_register(instr, 9);
-    
+
         // Extract PCoffset9 and sign-extend it
         let pc_offset = sign_extend(instr & 0x1FF, 9);
-    
+
         // Calculate target address: PC + PCoffset9
         let pc = registers.read(RegisterEnum::PC);
-        let target_address = pc as u32+pc_offset as u32 ;
-    
+        let target_address = pc as u32 + pc_offset as u32;
+
         // Read value from memory at the target address
         let value = memory.read(target_address as usize);
-    
+
         // Write the value to the destination register
         registers.write(dr, value);
-    
+
         // Update condition flags based on the loaded value
         registers.update_flags(dr);
     }
 
-
     /// Executes the LDR (Load Register) instruction.
-///  15        12 11        9 8        6 5                0
-// +------------+------------+----------+------------------+
-// |   Opcode   | Destination | BaseReg |     Offset6      |
-// +------------+------------+----------+------------------+
+    ///  15        12 11        9 8        6 5                0
+    // +------------+------------+----------+------------------+
+    // |   Opcode   | Destination | BaseReg |     Offset6      |
+    // +------------+------------+----------+------------------+
 
-/// `LDR DR, BaseR, Offset6`:
-/// - Calculates the target memory address by adding the 6-bit signed `Offset6` to the value in the base register (`BaseR`).
-/// - Loads the value from the target memory address into the destination register (`DR`).
-/// - Updates the condition flags based on the loaded value.
+    /// `LDR DR, BaseR, Offset6`:
+    /// - Calculates the target memory address by adding the 6-bit signed `Offset6` to the value in the base register (`BaseR`).
+    /// - Loads the value from the target memory address into the destination register (`DR`).
+    /// - Updates the condition flags based on the loaded value.
     pub fn ldr(instr: u16, registers: &mut Registers, memory: &Memory) {
         // Extract destination register (DR)
         let dr = extract_register(instr, 9);
-    
+
         // Extract base register (BaseR)
         let base_reg = extract_register(instr, 6);
-    
+
         // Extract Offset6 and sign-extend it
         let offset6 = sign_extend(instr & 0x3F, 6) as u32;
-    
+
         // Calculate the target memory address
         let base_address = registers.read(base_reg) as u32;
-        let target_address = (base_address+ offset6) as usize;
-    
+        let target_address = (base_address + offset6) as usize;
+
         // Read value from memory at the target address
         let value = memory.read(target_address);
-    
+
         // Write the value to the destination register
         registers.write(dr, value);
-    
+
         // Update condition flags based on the loaded value
         registers.update_flags(dr);
     }
 
+    /// Executes the LEA (Load Effective Address) instruction.
+    ///
+    /// `LEA DR, PCoffset9`:
+    /// - Computes the effective address by adding the 9-bit signed `PCoffset9` to the current `PC`.
+    /// - Stores the resulting address into the destination register (`DR`).
+    /// - Updates the condition flags based on the resulting value.
+    // 15        12 11        9 8                         0
+    // +------------+------------+---------------------------+
+    // |   Opcode   | Destination |        PCoffset9         |
+    // +------------+------------+---------------------------+
 
+    pub fn lea(instr: u16, registers: &mut Registers) {
+        // Extract destination register (DR)
+        let dr = extract_register(instr, 9);
+
+        // Extract PCoffset9 and sign-extend it
+        let pc_offset = sign_extend(instr & 0x1FF, 9);
+
+        // Calculate the effective address: PC + PCoffset9
+        let pc = registers.read(RegisterEnum::PC);
+        let effective_address = pc as u32 + pc_offset as u32;
+
+        // Write the effective address to the destination register
+        registers.write(dr, effective_address as u16);
+
+        // Update condition flags based on the effective address
+        registers.update_flags(dr);
+    }
 }
 
 /// Sign-extends a value to the given bit width.
@@ -272,11 +298,10 @@ fn sign_extend(x: u16, bit_count: usize) -> u16 {
         x
     }
 }
+
 /// Extracts a register from an instruction.
-///
 /// - `instr`: The 16-bit LC-3 instruction word.
 /// - `shift`: The bit position of the register in the instruction.
-///
 /// Returns the corresponding `Register`.
 fn extract_register(instr: u16, shift: usize) -> RegisterEnum {
     match (instr >> shift) & 0x7 {

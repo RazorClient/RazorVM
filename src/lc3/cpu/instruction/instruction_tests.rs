@@ -4,14 +4,12 @@ use super::super::hardware::Memory::Memory;
 use super::super::hardware::{RegisterEnum as Register, Registers};
 use super::super::Instructions;
 
-
 fn encode_br(n: bool, z: bool, p: bool, pc_offset9: i16) -> u16 {
     let opcode = 0b0000 << 12;
     let flags = ((n as u16) << 11) | ((z as u16) << 10) | ((p as u16) << 9);
     let offset = (pc_offset9 as u16) & 0x1FF; // Ensure 9 bits
     opcode | flags | offset
 }
-
 
 #[test]
 fn integration_test_add_register_mode() {
@@ -508,9 +506,12 @@ fn integration_test_br_all_flags_set() {
     let mut memory = Memory::new();
 
     // Initialize condition flags to NZP (all flags set)
-    registers.write(Register::COND, ConditionFlags::NEG.bits() as u16
-                                 | ConditionFlags::ZRO.bits() as u16
-                                 | ConditionFlags::POS.bits() as u16);
+    registers.write(
+        Register::COND,
+        ConditionFlags::NEG.bits() as u16
+            | ConditionFlags::ZRO.bits() as u16
+            | ConditionFlags::POS.bits() as u16,
+    );
 
     // Encode BRnzp PCoffset9=1
     let instr = encode_br(true, true, true, 1); // BRnzp with PCoffset9=1
@@ -701,7 +702,7 @@ fn integration_test_not_registers_unchanged() {
 
     // Initialize register R1 with a value
     registers.write(Register::R1, 0x0F0F); // R1 = 0x0F0F
-    // Initialize register R3 with another value
+                                           // Initialize register R3 with another value
     registers.write(Register::R3, 0xAAAA); // R3 = 0xAAAA
 
     // Encode NOT R2, R1
@@ -1033,7 +1034,7 @@ fn integration_test_not_multiple_operations() {
 
 fn encode_jsr(pc_offset11: i16) -> u16 {
     let opcode = 0b0100 << 12; // Opcode for JSR
-    let long_flag = 1 << 11;    // long_flag set to 1 for JSR
+    let long_flag = 1 << 11; // long_flag set to 1 for JSR
     let offset = (pc_offset11 as u16) & 0x07FF; // Ensure 11 bits
     opcode | long_flag | offset
 }
@@ -1045,10 +1046,54 @@ fn encode_jsr(pc_offset11: i16) -> u16 {
 /// Returns the encoded 16-bit instruction.
 fn encode_jsrr(base_reg: usize) -> u16 {
     let opcode = 0b0100 << 12; // Opcode for JSRR
-    let long_flag = 0 << 11;    // long_flag set to 0 for JSRR
+    let long_flag = 0 << 11; // long_flag set to 0 for JSRR
     let base = (base_reg & 0x7) << 6; // Ensure base_reg is 3 bits
     (opcode | long_flag | base) as u16
 }
 
+// not in the mood maybe later
+#[test]
+fn integration_test_lea_positive_offset() {
+    let mut registers = Registers::new();
 
-// not in the mood maybe later 
+    // Initialize PC to 0x3000
+    registers.write(Register::PC, 0x3000);
+
+    // Encode LEA R1, PCoffset9=2
+    let instr = (0b1110 << 12) | (1 << 9) | 0x002; // Opcode=1110 (LEA), DR=R1, PCoffset9=2
+
+    // Execute the LEA instruction
+    Instructions::lea(instr, &mut registers);
+
+    // Verify R1 = PC + 2 = 0x3002
+    assert_eq!(registers.read(Register::R1), 0x3002);
+
+    // Verify condition flags are set to POS
+    assert_eq!(
+        registers.read(Register::COND),
+        ConditionFlags::POS.bits() as u16
+    );
+}
+
+#[test]
+fn integration_test_lea_negative_offset() {
+    let mut registers = Registers::new();
+
+    // Initialize PC to 0x3002
+    registers.write(Register::PC, 0x3002);
+
+    // Encode LEA R2, PCoffset9=-2
+    let instr = (0b1110 << 12) | (2 << 9) | 0x1FE; // PCoffset9=-2 (0x1FE is -2 in 9-bit two's complement)
+
+    // Execute the LEA instruction
+    Instructions::lea(instr, &mut registers);
+
+    // Verify R2 = PC - 2 = 0x3000
+    assert_eq!(registers.read(Register::R2), 0x3000);
+
+    // Verify condition flags are set to POS
+    assert_eq!(
+        registers.read(Register::COND),
+        ConditionFlags::POS.bits() as u16
+    );
+}
