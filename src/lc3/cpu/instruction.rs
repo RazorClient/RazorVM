@@ -284,6 +284,32 @@ impl Instructions {
         // Update condition flags based on the effective address
         registers.update_flags(dr);
     }
+
+/// Executes the ST (Store) instruction.
+///
+/// `ST SR, PCoffset9`:
+/// - Computes the target memory address by adding the 9-bit signed `PCoffset9` to the current `PC`.
+/// - Stores the value from the source register (`SR`) into the computed memory address.
+// 15        12 11        9 8                         0
+// +------------+------------+---------------------------+
+// |   Opcode   | Source Reg  |        PCoffset9         |
+// +------------+------------+---------------------------+
+
+pub fn st(instr: u16, registers: &mut Registers, memory: &mut Memory) {
+    // Extract source register (SR)
+    let sr = extract_register(instr, 9);
+
+    // Extract PCoffset9 and sign-extend it
+    let pc_offset = sign_extend(instr & 0x1FF, 9);
+
+    // Calculate the target memory address: PC + PCoffset9
+    let pc = registers.read(RegisterEnum::PC) ;
+    let target_address = (pc as u32 + pc_offset as u32 ) as u16;
+
+    // Read value from the source register and write to the target memory address
+    let value = registers.read(sr);
+    memory.write(target_address as usize, value);
+}
 }
 
 /// Sign-extends a value to the given bit width.
@@ -302,7 +328,7 @@ fn sign_extend(x: u16, bit_count: usize) -> u16 {
 /// Extracts a register from an instruction.
 /// - `instr`: The 16-bit LC-3 instruction word.
 /// - `shift`: The bit position of the register in the instruction.
-/// Returns the corresponding `Register`.
+
 fn extract_register(instr: u16, shift: usize) -> RegisterEnum {
     match (instr >> shift) & 0x7 {
         0 => RegisterEnum::R0,

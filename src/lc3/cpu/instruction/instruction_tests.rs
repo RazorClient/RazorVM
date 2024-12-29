@@ -1097,3 +1097,45 @@ fn integration_test_lea_negative_offset() {
         ConditionFlags::POS.bits() as u16
     );
 }
+
+#[test]
+fn integration_test_store_positive_offset() {
+    let mut registers = Registers::new();
+    let mut memory = Memory::new();
+
+    // Initialize PC to 0x3000
+    registers.write(Register::PC, 0x3000);
+
+    // Initialize source register R1 with a value
+    registers.write(Register::R1, 0x1234);
+
+    // Encode ST R1, PCoffset9=2
+    let instr = (0b0011 << 12) | (1 << 9) | 0x002; // Opcode=0011 (ST), SR=R1, PCoffset9=2
+
+    // Execute the ST instruction
+    Instructions::st(instr, &mut registers, &mut memory);
+
+    // Verify memory at PC + 2 = 0x3002 contains 0x1234
+    assert_eq!(memory.read(0x3002), 0x1234);
+}
+
+#[test]
+fn integration_test_store_negative_offset() {
+    let mut registers = Registers::new();
+    let mut memory = Memory::new();
+
+    // Initialize PC to 0x3002
+    registers.write(Register::PC, 0x3002);
+
+    // Initialize source register R2 with a value
+    registers.write(Register::R2, 0xFFFF);
+
+    // Encode ST R2, PCoffset9=-2
+    let instr = (0b0011 << 12) | (2 << 9) | 0x1FE; // PCoffset9=-2 (0x1FE is -2 in 9-bit two's complement)
+
+    // Execute the ST instruction
+    Instructions::st(instr, &mut registers, &mut memory);
+
+    // Verify memory at PC - 2 = 0x3000 contains 0xFFFF
+    assert_eq!(memory.read(0x3000), 0xFFFF);
+}
