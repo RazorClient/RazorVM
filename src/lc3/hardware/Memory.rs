@@ -56,6 +56,13 @@ impl Clone for Memory {
     }
 }
 
+pub enum MemoryMappedReg {
+    /// keyboard status: The KBSR indicates whether a key has been pressed
+    Kbsr = 0xFE00, /* keyboard status */
+    /// keyboard data: The KBDR identifies which key was pressed
+    Kbdr = 0xFE02, /* keyboard data */
+}
+
 #[cfg(test)]
 mod memory_test {
     use super::*;
@@ -80,9 +87,10 @@ mod memory_test {
     }
 
     #[test]
-    #[should_panic]
-    fn test_memory_out_of_bounds_read() {
-        let memory = Memory::new();
-        memory.read(0x1_0000); // Invalid address
+    fn test_memory_wraparound_read() {
+        let mut memory = Memory::new();
+        memory.write(0x0000, 42); // Write value at address 0x0000
+        assert_eq!(memory.read(0x1_0000), 42); // Read from address 0x1_0000 (wraps to 0x0000)
     }
+        
 }
