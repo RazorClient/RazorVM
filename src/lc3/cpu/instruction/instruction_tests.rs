@@ -1,7 +1,8 @@
 //Integration test
 use super::super::hardware::Flag::ConditionFlags;
 use super::super::hardware::Memory::Memory;
-use super::super::hardware::{RegisterEnum as Register, Registers};
+use crate::lc3::hardware::Reg::RegisterEnum as Register;
+use crate::lc3::hardware::Reg::Registers;
 use super::super::Instructions;
 
 fn encode_br(n: bool, z: bool, p: bool, pc_offset9: i16) -> u16 {

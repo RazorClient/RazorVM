@@ -1,13 +1,8 @@
-use std::fs::File;
-use std::io::{self, Read};
+use std::io::{self};
 
-use crate::lc3::cpu::instruction;
-use crate::lc3::cpu::Decoder;
 use crate::lc3::cpu::Instructions;
-use crate::lc3::hardware::Flag;
 use crate::lc3::hardware::Memory::Memory;
 use crate::lc3::hardware::Reg;
-use crate::lc3::opcode;
 // use  crate::lc3::
 // use  crate::lc3::
 // use  crate::lc3::
@@ -41,7 +36,7 @@ impl LC3 {
         // // self.registers.write(R_COND, ConditionFlags::ZRO as u16);
         // // self.registers.write(R_PC, 0x3000);
 
-        let mut running = true;
+        let running = true;
 
         let instructions = Instructions;
 

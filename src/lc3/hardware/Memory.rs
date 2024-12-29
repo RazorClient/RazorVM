@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{Read, Result};
+use std::io::Read;
 use std::path::Path;
 
 pub const MEMORY_SIZE: usize = 1 << 16;
