@@ -2,10 +2,18 @@ use std::fs::File;
 use std::io::Read;
 use std::path::Path;
 
+use crate::lc3::sys::file;
 pub const MEMORY_SIZE: usize = 1 << 16;
 #[derive(Copy)]
 pub struct Memory {
     data: [u16; MEMORY_SIZE],
+}
+
+pub enum MemoryMappedReg {
+    /// keyboard status: The KBSR indicates whether a key has been pressed
+    Kbsr = 0xFE00, /* keyboard status */
+    /// keyboard data: The KBDR identifies which key was pressed
+    Kbdr = 0xFE02, /* keyboard data */
 }
 
 impl Memory {
@@ -13,8 +21,21 @@ impl Memory {
         Memory { data: [0; 65536] }
     }
 
-    pub fn read(&self, address: usize) -> u16 {
+    pub fn read(&mut self, address: usize) -> u16 {
         let effective_address = address & 0xFFFF; // Wrap within 16-bit range
+
+        // match effective_address {
+        //     kbsr => {
+        //         if check_key() {
+        //             self.data[MemoryMappedReg::Kbsr as usize] = 1 << 15; // Set the high bit to indicate key press
+        //             self.data[MemoryMappedReg::Kbdr as usize] = 1;
+        //             // getchar::get_char() as u16; // Update keyboard data register
+        //         } else {
+        //             self.data[kbsr] = 0; // Clear the high bit if no key press
+        //         }
+        //     }
+        //     _ => {} // Normal memory access
+        // }
         if effective_address < self.data.len() {
             self.data[effective_address]
         } else {
@@ -37,13 +58,12 @@ impl Clone for Memory {
     }
 }
 
-pub enum MemoryMappedReg {
-    /// keyboard status: The KBSR indicates whether a key has been pressed
-    Kbsr = 0xFE00, /* keyboard status */
-    /// keyboard data: The KBDR identifies which key was pressed
-    Kbdr = 0xFE02, /* keyboard data */
+fn check_key()-> bool{
+   false
 }
-
+fn getchar() -> char {
+    '\0' // Stub implementation for getchar
+}
 #[cfg(test)]
 mod memory_test {
     use super::*;
@@ -73,5 +93,10 @@ mod memory_test {
         memory.write(0x0000, 42); // Write value at address 0x0000
         assert_eq!(memory.read(0x1_0000), 42); // Read from address 0x1_0000 (wraps to 0x0000)
     }
-        
+    #[test]
+    fn test_file_read() {
+
+        let result = file::read_image("Static/out.obj");
+        assert!(result.is_ok());
+    }
 }

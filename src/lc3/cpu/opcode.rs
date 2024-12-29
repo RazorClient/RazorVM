@@ -19,7 +19,7 @@ pub enum OpCode {
     Trap = 15,
 }
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum OpCodeError {
     InvalidOpcode,
 }
@@ -48,7 +48,6 @@ impl OpCode {
         }
     }
 }
-
 
 #[cfg(test)]
 mod tests {

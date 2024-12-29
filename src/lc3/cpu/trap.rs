@@ -1,5 +1,8 @@
-use crate::lc3::hardware::{Memory::Memory, Reg::{Registers,RegisterEnum}};
-use std::io::{self, Write,Read};
+use crate::lc3::hardware::{
+    Memory::Memory,
+    Reg::{RegisterEnum, Registers},
+};
+use std::io::{self, Read, Write};
 use std::process;
 
 /// Trap codes for the LC-3.
@@ -17,7 +20,6 @@ pub enum TrapCode {
 /// - `registers`: The mutable reference to the `Registers` struct.
 /// - `memory`: The mutable reference to the `Memory` struct.
 pub fn trap(instr: u16, registers: &mut Registers, memory: &mut Memory) {
-
     // Save PC to R7 for return address
     let pc = registers.read(RegisterEnum::PC);
     registers.write(RegisterEnum::R7, pc);

@@ -1,10 +1,10 @@
 //Integration test
+use crate::lc3::cpu::instruction::Instructions;
 use crate::lc3::hardware::Flag::ConditionFlags;
 use crate::lc3::hardware::Memory::Memory;
 use crate::lc3::hardware::Reg::RegisterEnum as Register;
 use crate::lc3::hardware::Reg::Registers;
-use crate::lc3::cpu::instruction::Instructions;
-use std::io::{self, Write,Read};
+use std::io::{self, Read, Write};
 
 fn encode_br(n: bool, z: bool, p: bool, pc_offset9: i16) -> u16 {
     let opcode = 0b0000 << 12;
@@ -169,7 +169,7 @@ fn integration_test_ldi_positive_value() {
     memory.write(0x3000, 0x5555);
 
     // Execute the LDI instruction
-    Instructions::ldi(instr, &mut registers, &memory);
+    Instructions::ldi(instr, &mut registers, &mut memory);
 
     // Verify R1 = 0x5555
     assert_eq!(registers.read(dr), 0x5555);
@@ -206,7 +206,7 @@ fn integration_test_ldi_negative_value() {
     memory.write(0x3001, 0x8000);
 
     // Execute the LDI instruction
-    Instructions::ldi(instr, &mut registers, &memory);
+    Instructions::ldi(instr, &mut registers, &mut memory);
 
     // Verify R2 = 0x8000
     assert_eq!(registers.read(dr), 0x8000);
@@ -243,7 +243,7 @@ fn integration_test_ldi_zero_value() {
     memory.write(0x3002, 0x0000);
 
     // Execute the LDI instruction
-    Instructions::ldi(instr, &mut registers, &memory);
+    Instructions::ldi(instr, &mut registers, &mut memory);
 
     // Verify R3 = 0x0000
     assert_eq!(registers.read(dr), 0x0000);
@@ -280,7 +280,7 @@ fn integration_test_ldi_negative_pc_offset() {
     memory.write(0x3003, 0x5678);
 
     // Execute the LDI instruction
-    Instructions::ldi(instr, &mut registers, &memory);
+    Instructions::ldi(instr, &mut registers, &mut memory);
 
     // Verify R4 = 0x5678
     assert_eq!(registers.read(dr), 0x5678);
@@ -1231,4 +1231,3 @@ fn integration_test_store_register_negative_offset() {
     // Verify memory at BaseR + Offset6 = 0x3000 contains 0xFFFF
     assert_eq!(memory.read(0x3000), 0xFFFF);
 }
-

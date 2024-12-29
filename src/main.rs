@@ -3,6 +3,8 @@
 
 mod lc3;
 use lc3::vm::vm;
+use lc3::sys::file;
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
 
@@ -10,9 +12,19 @@ fn main() {
         eprintln!("Usage: lc3 [image-file1] [image-file2] ...");
         std::process::exit(2);
     }
-
-    // Instantiate the LC-3 VM
+    //init the vm
     let mut vm = vm::LC3::new();
-    
-    vm.main_loop();
+        // Load the provided image files into the VM's memory
+        for image_file in &args[1..] {
+            match vm.load_image(image_file) {
+                Ok(_) => println!("Loaded: {}", image_file),
+                Err(e) => eprintln!("Failed to load {}: {}", image_file, e),
+            }
+        }
+
+
+
+
+
+    vm.run();
 }

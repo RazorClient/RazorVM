@@ -1,6 +1,6 @@
-use crate::lc3::hardware::{Memory::Memory, Reg::Registers};
-use crate::lc3::cpu::opcode::{OpCode, OpCodeError};
 use crate::lc3::cpu::instruction::Instructions;
+use crate::lc3::cpu::opcode::{OpCode, OpCodeError};
+use crate::lc3::hardware::{Memory::Memory, Reg::Registers};
 
 /// Extracts the opcode (top 4 bits) from a 16-bit instruction.
 #[inline]
@@ -9,7 +9,6 @@ pub fn extract_op_code(instruction: u16) -> Result<OpCode, OpCodeError> {
 }
 
 pub fn execute_instruction(instr: u16, registers: &mut Registers, memory: &mut Memory) {
-
     match extract_op_code(instr) {
         Ok(OpCode::Add) => Instructions::add(instr, registers),
         Ok(OpCode::And) => Instructions::bitwise_and(instr, registers),
@@ -34,7 +33,6 @@ pub fn execute_instruction(instr: u16, registers: &mut Registers, memory: &mut M
         Err(_) => eprintln!("Invalid opcode in instruction: {:#06X}", instr),
     }
 }
-
 
 #[cfg(test)]
 mod tests {
