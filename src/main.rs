@@ -13,5 +13,6 @@ fn main() {
 
     // Instantiate the LC-3 VM
     let mut vm = vm::LC3::new();
+    
     vm.main_loop();
 }

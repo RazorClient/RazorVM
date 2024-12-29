@@ -5,6 +5,13 @@ use super::trap;
 pub struct Instructions;
 
 impl Instructions {
+
+
+    /// 15        12 11        9 8        6 5        4         0
+    // +------------+------------+----------+-------------------+
+    // |  Opcode    |   DR       |   SR1    | Mode |  Operand    |
+    // +------------+------------+----------+-------------------+
+
     /// The ADD instruction can either:
     /// - Add two registers: `ADD DR, SR1, SR2`
     /// - Add a register and an immediate value: `ADD DR, SR1, imm5`
@@ -35,6 +42,11 @@ impl Instructions {
         registers.update_flags(dr);
     }
 
+    ///15        12 11        9 8                         0
+    // +------------+------------+---------------------------+
+    // |  Opcode    |   DR       |      PCoffset9           |
+    // +------------+------------+---------------------------+
+
     pub fn ldi(instr: u16, registers: &mut Registers, memory: &Memory) {
         // Extract destination register (DR)
         let dr = extract_register(instr, 9);
@@ -56,11 +68,13 @@ impl Instructions {
 
         // Write the value to the destination register
         registers.write(dr, value);
-
-        // Update condition flags based on the loaded value
         registers.update_flags(dr);
     }
 
+    //     15        12 11        9 8        6 5        4         0
+    // +------------+------------+----------+-------------------+
+    // |  Opcode    |   DR       |   SR1    | Mode |  Operand    |
+    // +------------+------------+----------+-------------------+
     /// If bit [5] is 0, the second source operand is obtained from SR2.
     /// If bit [5] is 1, the second source operand is obtained by sign-extending the imm5 field to 16 bits.
     /// In either case, the second source operand and the contents of SR1 are bit- wise ANDed,
@@ -131,7 +145,6 @@ impl Instructions {
         // Extract condition flags from bits 11-9
         let cond_flag = (instr >> 9) & 0x7; // 3 bits: n, z, p
 
-        // Extract PCoffset9 from bits 8-0 and sign-extend it
         let pc_offset = sign_extend(instr & 0x1FF, 9) as i16;
 
         // Current PC
@@ -197,17 +210,15 @@ impl Instructions {
             registers.write(RegisterEnum::PC, target_pc);
         }
     }
-    //LD
-    // 15        12 11        9 8                         0
-    // +------------+------------+---------------------------+
-    // |   Opcode   | Destination |        PCoffset9         |
-    // +------------+------------+---------------------------+
+    /// LD
+    /// 15        12 11        9 8                         0
+    /// +------------+------------+---------------------------+
+    /// |   Opcode   | Destination |        PCoffset9         |
+    /// +------------+------------+---------------------------+
 
     pub fn ld(instr: u16, registers: &mut Registers, memory: &Memory) {
         // Extract destination register (DR)
         let dr = extract_register(instr, 9);
-
-        // Extract PCoffset9 and sign-extend it
         let pc_offset = sign_extend(instr & 0x1FF, 9);
 
         // Calculate target address: PC + PCoffset9
@@ -240,7 +251,6 @@ impl Instructions {
         // Extract base register (BaseR)
         let base_reg = extract_register(instr, 6);
 
-        // Extract Offset6 and sign-extend it
         let offset6 = sign_extend(instr & 0x3F, 6) as u32;
 
         // Calculate the target memory address
@@ -272,7 +282,6 @@ impl Instructions {
         // Extract destination register (DR)
         let dr = extract_register(instr, 9);
 
-        // Extract PCoffset9 and sign-extend it
         let pc_offset = sign_extend(instr & 0x1FF, 9);
 
         // Calculate the effective address: PC + PCoffset9
@@ -300,7 +309,6 @@ impl Instructions {
         // Extract source register (SR)
         let sr = extract_register(instr, 9);
 
-        // Extract PCoffset9 and sign-extend it
         let pc_offset = sign_extend(instr & 0x1FF, 9);
 
         // Calculate the target memory address: PC + PCoffset9
@@ -311,6 +319,8 @@ impl Instructions {
         let value = registers.read(sr);
         memory.write(target_address as usize, value);
     }
+
+
     /// Executes the STI (Store Indirect) instruction.
     ///
     /// `STI SR, PCoffset9`:
@@ -327,7 +337,6 @@ impl Instructions {
         // Extract source register (SR)
         let sr = extract_register(instr, 9);
 
-        // Extract PCoffset9 and sign-extend it
         let pc_offset = sign_extend(instr & 0x1FF, 9) as u32;
 
         // Calculate intermediate memory address: PC + PCoffset9
@@ -341,6 +350,8 @@ impl Instructions {
         let value = registers.read(sr);
         memory.write(final_address as usize, value);
     }
+
+    
     /// Executes the STR (Store Register) instruction.
     ///  15        12 11        9 8        6 5                0
     // +------------+------------+----------+------------------+
@@ -379,12 +390,20 @@ impl Instructions {
 /// - `bit_count`: The original bit width of the value.
 
 fn sign_extend(x: u16, bit_count: usize) -> u16 {
+    // bit_count is the original number of bits
+    // This if clause is testing the sign of the value.
+    // We're moving `x` to the right up until
+    // the sign bit (`bit_count - 1`).
+    // Then check if it's different than zero,
+    // if it is, it's signed as 1 (negative)
+    // Meaning we have to pad with ones instead of zeroes
     if (x >> (bit_count - 1)) & 1 != 0 {
         x | (0xFFFF << bit_count)
     } else {
         x
     }
 }
+
 
 /// Extracts a register from an instruction.
 /// - `instr`: The 16-bit LC-3 instruction word.

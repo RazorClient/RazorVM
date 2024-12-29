@@ -26,11 +26,10 @@ pub fn execute_instruction(instr: u16, registers: &mut Registers, memory: &mut M
         Ok(OpCode::Str) => Instructions::str(instr, registers, memory),
         Ok(OpCode::Trap) => Instructions::trap(instr, registers, memory),
         Ok(OpCode::Rti) => {
-            eprintln!("RTI instruction encountered: {:#06X} (Not implemented)", instr);
+            eprintln!("RTI instruction encountered: {:#06X}", instr);
         }
         Ok(OpCode::Res) => {
-            // Reserved opcode, typically ignored
-            eprintln!("RES instruction encountered: {:#06X} (Reserved, no operation performed)", instr);
+            eprintln!("RES instruction encountered: {:#06X}", instr);
         }
         Err(_) => eprintln!("Invalid opcode in instruction: {:#06X}", instr),
     }
