@@ -47,44 +47,8 @@ impl LC3 {
 
         //     let opcode = Decoder::decode(instr);
 
-        //     match opcode {
-        //         instruction::OpCode::ADD => instructions.add(instr, &mut self.registers, &mut self.memory),
-        //         // instruction::OpCode::AND => instruction::and(&mut self.registers, &mut self.memory, instr),
-        //         // instruction::OpCode::NOT => instruction::not(&mut self.registers, instr),
-        //         // OP_BR => instruction::br(&mut self.registers, instr),
-        //         // OP_JMP => instruction::jmp(&mut self.registers, instr),
-        //         // OP_JSR => instruction::jsr(&mut self.registers, instr),
-        //         // OP_LD => instruction::ld(&mut self.registers, &mut self.memory, instr),
-        //         // OP_LDI => instruction::ldi(&mut self.registers, &mut self.memory, instr),
-        //         // OP_LDR => instruction::ldr(&mut self.registers, &mut self.memory, instr),
-        //         // OP_LEA => instruction::lea(&mut self.registers, instr),
-        //         // OP_ST => instruction::st(&mut self.registers, &mut self.memory, instr),
-        //         // OP_STI => instruction::sti(&mut self.registers, &mut self.memory, instr),
-        //         // OP_STR => instruction::str(&mut self.registers, &mut self.memory, instr),
-        //         // OP_TRAP => {
-        //         //     if !instruction::trap(&mut self.registers, &mut self.memory, instr) {
-        //         //         running = false;
-        //         //     }
-        //         // }
-        //         _ => {
-        //             eprintln!("Unknown or unsupported opcode encountered: {:04X}", opcode);
-        //             running = false;
-        //         }
-        //     }
+
         println!("VM execution completed.");
     }
 
-    //     pub fn execute_instruction(&mut self, instr: u16) {
-    //         // Decode the instruction
-    //         if let Some(opcode) = Decoder::decode(instr) {
-    //             match opcode {
-    //                 OpCode::ADD => {
-    //                     // Call execute_add from Instructions
-    //                     Instructions::add(instr, &mut self.registers);
-    //                 }
-    //                 // Handle other opcodes...
-    //                 _ => {}
-    //             }
-    //         }
-    //     }
 }
