@@ -1,8 +1,8 @@
-#[allow(dead_code)]
+#![allow(dead_code)]
+#![allow(warnings)]
+
 mod lc3;
-
-use lc3::vm;
-
+use lc3::vm::vm;
 fn main() {
     let args: Vec<String> = std::env::args().collect();
 

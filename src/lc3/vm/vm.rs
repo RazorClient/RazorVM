@@ -1,14 +1,14 @@
 use std::io::{self};
 
-use crate::lc3::cpu::Instructions;
+use crate::lc3::cpu::instruction::Instructions;
 use crate::lc3::hardware::Memory::Memory;
-use crate::lc3::hardware::Reg;
+use crate::lc3::hardware::Reg::Registers;
 // use  crate::lc3::
 // use  crate::lc3::
 // use  crate::lc3::
 pub struct LC3 {
     memory: Memory,
-    registers: Reg::Registers,
+    registers:Registers,
 }
 
 impl LC3 {
@@ -16,7 +16,7 @@ impl LC3 {
     pub fn new() -> Self {
         Self {
             memory: Memory::new(),
-            registers: Reg::Registers::new(),
+            registers: Registers::new(),
         }
     }
 

@@ -1,9 +1,10 @@
 //Integration test
-use super::super::hardware::Flag::ConditionFlags;
-use super::super::hardware::Memory::Memory;
+use crate::lc3::hardware::Flag::ConditionFlags;
+use crate::lc3::hardware::Memory::Memory;
 use crate::lc3::hardware::Reg::RegisterEnum as Register;
 use crate::lc3::hardware::Reg::Registers;
-use super::super::Instructions;
+use crate::lc3::cpu::instruction::Instructions;
+use std::io::{self, Write,Read};
 
 fn encode_br(n: bool, z: bool, p: bool, pc_offset9: i16) -> u16 {
     let opcode = 0b0000 << 12;
@@ -36,7 +37,7 @@ fn integration_test_add_register_mode() {
 #[test]
 fn integration_test_add_immediate_mode() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize registers
     registers.write(Register::R0, 15); // R0 = 15
@@ -78,7 +79,7 @@ fn integration_test_add_result_zero() {
 #[test]
 fn integration_test_add_overflow_negative() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize registers with values that cause negative overflow
     registers.write(Register::R0, 0x8000); // R0 = -32768
@@ -100,7 +101,7 @@ fn integration_test_add_overflow_negative() {
 #[test]
 fn test_add_registers_negative() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize registers
     registers.write(Register::R1, (-15i16) as u16); // R1 = -15 -> 0xFFF1
@@ -123,7 +124,7 @@ fn test_add_registers_negative() {
 #[test]
 fn test_add_registers_zero() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize registers
     registers.write(Register::R1, 10);
@@ -294,7 +295,7 @@ fn integration_test_ldi_negative_pc_offset() {
 #[test]
 fn integration_test_br_take_branch_n_flag() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize condition flags to NEG
     registers.write(Register::COND, ConditionFlags::NEG.bits() as u16);
@@ -315,7 +316,7 @@ fn integration_test_br_take_branch_n_flag() {
 #[test]
 fn integration_test_br_take_branch_z_flag() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize condition flags to ZRO
     registers.write(Register::COND, ConditionFlags::ZRO.bits() as u16);
@@ -336,7 +337,7 @@ fn integration_test_br_take_branch_z_flag() {
 #[test]
 fn integration_test_br_take_branch_p_flag() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize condition flags to POS
     registers.write(Register::COND, ConditionFlags::POS.bits() as u16);
@@ -357,7 +358,7 @@ fn integration_test_br_take_branch_p_flag() {
 #[test]
 fn integration_test_br_take_branch_multiple_flags() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize condition flags to ZRO
     registers.write(Register::COND, ConditionFlags::ZRO.bits() as u16);
@@ -378,7 +379,7 @@ fn integration_test_br_take_branch_multiple_flags() {
 #[test]
 fn integration_test_br_not_take_branch_multiple_flags() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize condition flags to POS
     registers.write(Register::COND, ConditionFlags::POS.bits() as u16);
@@ -399,7 +400,7 @@ fn integration_test_br_not_take_branch_multiple_flags() {
 #[test]
 fn integration_test_br_no_flags() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize condition flags to POS
     registers.write(Register::COND, ConditionFlags::POS.bits() as u16);
@@ -420,7 +421,7 @@ fn integration_test_br_no_flags() {
 #[test]
 fn integration_test_br_backward_branch() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize condition flags to ZRO
     registers.write(Register::COND, ConditionFlags::ZRO.bits() as u16);
@@ -441,7 +442,7 @@ fn integration_test_br_backward_branch() {
 #[test]
 fn integration_test_br_PC_wrap_around() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize condition flags to POS
     registers.write(Register::COND, ConditionFlags::POS.bits() as u16);
@@ -462,7 +463,7 @@ fn integration_test_br_PC_wrap_around() {
 #[test]
 fn integration_test_br_max_positive_offset() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize condition flags to POS
     registers.write(Register::COND, ConditionFlags::POS.bits() as u16);
@@ -483,7 +484,7 @@ fn integration_test_br_max_positive_offset() {
 #[test]
 fn integration_test_br_max_negative_offset() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize condition flags to N
     registers.write(Register::COND, ConditionFlags::NEG.bits() as u16);
@@ -504,7 +505,7 @@ fn integration_test_br_max_negative_offset() {
 #[test]
 fn integration_test_br_all_flags_set() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize condition flags to NZP (all flags set)
     registers.write(
@@ -530,7 +531,7 @@ fn integration_test_br_all_flags_set() {
 #[test]
 fn integration_test_br_no_matching_flags() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize condition flags to ZRO
     registers.write(Register::COND, ConditionFlags::ZRO.bits() as u16);
@@ -555,7 +556,7 @@ fn encode_not(dr: u16, sr: u16) -> u16 {
 #[test]
 fn integration_test_not_positive_value() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize register R1 with a positive value
     registers.write(Register::R1, 0x1234); // R1 = 0x1234
@@ -579,7 +580,7 @@ fn integration_test_not_positive_value() {
 #[test]
 fn integration_test_not_negative_value() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize register R1 with a negative value
     registers.write(Register::R1, 0x8000); // R1 = 0x8000 (-32768)
@@ -603,7 +604,7 @@ fn integration_test_not_negative_value() {
 #[test]
 fn integration_test_not_zero_value() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize register R1 with zero
     registers.write(Register::R1, 0x0000); // R1 = 0x0000
@@ -627,7 +628,7 @@ fn integration_test_not_zero_value() {
 #[test]
 fn integration_test_not_max_value() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize register R1 with maximum value
     registers.write(Register::R1, 0xFFFF); // R1 = 0xFFFF (-1)
@@ -651,7 +652,7 @@ fn integration_test_not_max_value() {
 #[test]
 fn integration_test_not_min_value() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize register R1 with minimum value
     registers.write(Register::R1, 0x8000); // R1 = 0x8000 (-32768)
@@ -675,7 +676,7 @@ fn integration_test_not_min_value() {
 #[test]
 fn integration_test_not_all_flags_set() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize register R1 with a value that sets all flags after NOT
     registers.write(Register::R1, 0x0001); // R1 = 0x0001
@@ -699,7 +700,7 @@ fn integration_test_not_all_flags_set() {
 #[test]
 fn integration_test_not_registers_unchanged() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize register R1 with a value
     registers.write(Register::R1, 0x0F0F); // R1 = 0x0F0F
@@ -728,7 +729,7 @@ fn integration_test_not_registers_unchanged() {
 #[test]
 fn integration_test_not_multiple_operations() {
     let mut registers = Registers::new();
-    let mut memory = Memory::new();
+    let memory = Memory::new();
 
     // Initialize registers
     registers.write(Register::R1, 0x00FF); // R1 = 0x00FF
@@ -1230,3 +1231,4 @@ fn integration_test_store_register_negative_offset() {
     // Verify memory at BaseR + Offset6 = 0x3000 contains 0xFFFF
     assert_eq!(memory.read(0x3000), 0xFFFF);
 }
+

@@ -1,6 +1,6 @@
-use super::hardware::Memory::Memory;
-use super::hardware::Reg::{RegisterEnum, Registers};
-
+use super::super::hardware::Memory::Memory;
+use super::super::hardware::Reg::{RegisterEnum, Registers};
+use super::trap;
 /// Represents LC-3 instructions and their implementations.
 pub struct Instructions;
 
@@ -60,6 +60,7 @@ impl Instructions {
         // Update condition flags based on the loaded value
         registers.update_flags(dr);
     }
+
     /// If bit [5] is 0, the second source operand is obtained from SR2.
     /// If bit [5] is 1, the second source operand is obtained by sign-extending the imm5 field to 16 bits.
     /// In either case, the second source operand and the contents of SR1 are bit- wise ANDed,
@@ -147,12 +148,12 @@ impl Instructions {
         }
         // If branch not taken, PC remains unchanged (already incremented)
     }
+
+    /// `JMP BaseR`:
     // 15        12 11 9 8 6 5         0
     // +------------+-----+-----------+
     // |   Opcode   |BaseR|   Unused   |
     // +------------+-----+-----------+
-
-    /// `JMP BaseR`:
     /// - Sets PC to the value contained in BaseR.
     /// - Also handles the RET instruction when BaseR is R7.
     pub fn jmp(instr: u16, registers: &mut Registers) {
@@ -167,16 +168,16 @@ impl Instructions {
         registers.write(RegisterEnum::PC, target_address);
     }
 
+    /// `JSR PCoffset11`:
     // 15        12 11        0
     // +------------+------------+
     // |   Opcode   | PCoffset11  |
     // +------------+------------+
     /// Executes the JSR (Jump to Subroutine) instruction.
-    ///
-    /// `JSR PCoffset11`:
     /// - Stores the current PC in R7.
     /// - Adds the sign-extended PCoffset11 to the current PC to get the target address.
     /// - Sets PC to the target address.
+    
     pub fn jsr(instr: u16, registers: &mut Registers) {
         let long_flag = (instr >> 11) & 0x1;
 
@@ -196,6 +197,7 @@ impl Instructions {
             registers.write(RegisterEnum::PC, target_pc);
         }
     }
+    //LD
     // 15        12 11        9 8                         0
     // +------------+------------+---------------------------+
     // |   Opcode   | Destination |        PCoffset9         |
@@ -222,13 +224,12 @@ impl Instructions {
         registers.update_flags(dr);
     }
 
+    /// `LDR DR, BaseR, Offset6`:
     /// Executes the LDR (Load Register) instruction.
     ///  15        12 11        9 8        6 5                0
     // +------------+------------+----------+------------------+
     // |   Opcode   | Destination | BaseReg |     Offset6      |
     // +------------+------------+----------+------------------+
-
-    /// `LDR DR, BaseR, Offset6`:
     /// - Calculates the target memory address by adding the 6-bit signed `Offset6` to the value in the base register (`BaseR`).
     /// - Loads the value from the target memory address into the destination register (`DR`).
     /// - Updates the condition flags based on the loaded value.
@@ -367,7 +368,9 @@ impl Instructions {
         let value = registers.read(sr);
         memory.write(target_address as usize, value);
     }
-
+    pub fn trap(instr: u16, registers: &mut Registers, memory: &mut Memory) {
+        trap::trap(instr, registers, memory);
+    }
 }
 
 /// Sign-extends a value to the given bit width.
