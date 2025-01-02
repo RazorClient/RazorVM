@@ -385,13 +385,15 @@ impl Instructions {
 /// - `bit_count`: The original bit width of the value.
 
 fn sign_extend(x: u16, bit_count: usize) -> u16 {
-    // bit_count is the original number of bits
+
     // This if clause is testing the sign of the value.
     // We're moving `x` to the right up until
     // the sign bit (`bit_count - 1`).
     // Then check if it's different than zero,
     // if it is, it's signed as 1 (negative)
     // Meaning we have to pad with ones instead of zeroes
+    
+    //Check the Sign Bit
     if (x >> (bit_count - 1)) & 1 != 0 {
         x | (0xFFFF << bit_count)
     } else {

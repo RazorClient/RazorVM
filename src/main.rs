@@ -21,11 +21,6 @@ fn main() {
                 Err(e) => eprintln!("Failed to load {}: {}", image_file, e),
             }
         }
-        
-
-
-
-
 
     vm.run();
 }

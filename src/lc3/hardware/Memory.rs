@@ -63,6 +63,7 @@ impl Clone for Memory {
 fn check_key()-> bool{
    false
 }
+
 fn getchar() -> char {
     '\0' 
 }

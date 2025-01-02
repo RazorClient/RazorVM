@@ -60,5 +60,6 @@ impl LC3 {
 
         }
         println!("VM execution completed.");
+        
     }
 }
