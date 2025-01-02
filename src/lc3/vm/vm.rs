@@ -1,8 +1,10 @@
 use std::io::{self};
 
 use crate::lc3::cpu::instruction::Instructions;
+use crate::lc3::cpu::decode::execute_instruction;
 use crate::lc3::hardware::Memory::{Memory,MEMORY_SIZE};
-use crate::lc3::hardware::Reg::Registers;
+use crate::lc3::hardware::Reg::{Registers,RegisterEnum};
+use crate::lc3::hardware::Flag::ConditionFlags;
 use crate::lc3::sys::file::read_image;
 // use  crate::lc3::
 // use  crate::lc3::
@@ -20,8 +22,9 @@ impl LC3 {
             registers: Registers::new(),
         }
     }
+
     pub fn load_image(&mut self, image_path: &str)->io::Result<()>{
-                  // Use the `read_image` function to load the file into a new Memory instance
+        //load the file into a new Memory instance
         let mut loaded_memory = read_image(image_path)?;
 
         // Merge the loaded memory into the VM's existing memory
@@ -34,21 +37,28 @@ impl LC3 {
     }
     /// Run the VM main loop
     pub fn run(&mut self) {
-        // // Initialize registers
-        // // self.registers.write(R_COND, ConditionFlags::ZRO as u16);
-        // // self.registers.write(R_PC, 0x3000);
+        // Initialize registers
+        self.registers.write(RegisterEnum::COND, ConditionFlags::ZRO.bits());
+        self.registers.write(RegisterEnum::PC, 0x3000);
+        println!("Registers Init");
 
         let running = true;
 
         let instructions = Instructions;
 
-        // while running {
-        //     let pc = self.registers.read(R_PC);
-        //     let instr = self.memory.read(pc as usize);
-        //     self.registers.write(R_PC, pc.wrapping_add(1));
+        while running {
+        // Fetch the program counter (PC)
+        let pc = self.registers.read(RegisterEnum::PC);
+        // Fetch the instruction from memory
+        let instr = self.memory.read(pc as usize);
+        // Increment the PC
+        self.registers.write(RegisterEnum::PC, pc.wrapping_add(1));
+        // Print the instruction being executed
+        println!("Executing instruction: {}", instr);
+        // Decode and execute the instruction
+        execute_instruction(instr, &mut self.registers, &mut self.memory);
 
-        //     let opcode = Decoder::decode(instr);
-
+        }
         println!("VM execution completed.");
     }
 }

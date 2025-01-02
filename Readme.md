@@ -1,4 +1,4 @@
 todo:
-- do the main loop rn 
+- get trap working 
 - figure out the platform stuff
-- just get a game to rrun 
+- get a game to run 

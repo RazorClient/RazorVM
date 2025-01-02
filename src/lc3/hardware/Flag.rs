@@ -2,10 +2,10 @@ use bitflags::bitflags;
 
 bitflags! {
     #[derive(PartialEq, Debug)]
-    pub struct ConditionFlags: u8 {
-        const POS = 0b001; // Positive
-        const ZRO = 0b010; // Zero
-        const NEG = 0b100; // Negative
+    pub struct ConditionFlags: u16 {
+        const POS = 0b0001; // Positive
+        const ZRO = 0b0010; // Zero
+        const NEG = 0b0100; // Negative
     }
 }
 

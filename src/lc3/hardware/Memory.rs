@@ -4,6 +4,7 @@ use std::path::Path;
 
 use crate::lc3::sys::file;
 pub const MEMORY_SIZE: usize = 1 << 16;
+
 #[derive(Copy)]
 pub struct Memory {
     data: [u16; MEMORY_SIZE],
@@ -52,6 +53,7 @@ impl Memory {
         }
     }
 }
+
 impl Clone for Memory {
     fn clone(&self) -> Memory {
         *self
@@ -62,7 +64,7 @@ fn check_key()-> bool{
    false
 }
 fn getchar() -> char {
-    '\0' // Stub implementation for getchar
+    '\0' 
 }
 #[cfg(test)]
 mod memory_test {
@@ -90,8 +92,8 @@ mod memory_test {
     #[test]
     fn test_memory_wraparound_read() {
         let mut memory = Memory::new();
-        memory.write(0x0000, 42); // Write value at address 0x0000
-        assert_eq!(memory.read(0x1_0000), 42); // Read from address 0x1_0000 (wraps to 0x0000)
+        memory.write(0x0000, 42);
+        assert_eq!(memory.read(0x1_0000), 42); 
     }
     #[test]
     fn test_file_read() {

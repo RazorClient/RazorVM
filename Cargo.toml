@@ -5,4 +5,5 @@ edition = "2021"
 
 [dependencies]
 bitflags = "2.6.0"
-byteorder = "1.4"
+byteorder = "1.5"
+termios = "0.3.3"

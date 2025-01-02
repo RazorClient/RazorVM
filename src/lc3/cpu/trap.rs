@@ -44,12 +44,17 @@ pub fn trap(instr: u16, registers: &mut Registers, memory: &mut Memory) {
         0x22 => {
             // TRAP PUTS: Output a word string
             let mut address = registers.read(RegisterEnum::R0) as usize;
-            while memory.read(address) != 0 {
-                let char_output = (memory.read(address) as u8) as char;
-                print!("{}", char_output);
+            loop {
+                let word = memory.read(address);
+                if word == 0 {
+                    break;
+                }
+                // Only lower 8 bits are used for the character.
+                let c = (word & 0xFF) as u8 as char;
+                print!("{}", c);
                 address += 1;
             }
-            io::stdout().flush().expect("Failed to flush stdout");
+            io::stdout().flush().expect("Failed to flush stdout (PUTS).");
         }
         0x23 => {
             // TRAP IN: Get a single character with echo
@@ -64,6 +69,7 @@ pub fn trap(instr: u16, registers: &mut Registers, memory: &mut Memory) {
             let char_output = input as char;
             print!("{}", char_output);
             registers.write(RegisterEnum::R0, input as u16);
+            io::stdout().flush().expect("Failed to flush stdout after echo (IN).");
         }
         0x24 => {
             // TRAP PUTSP: Output a byte string
